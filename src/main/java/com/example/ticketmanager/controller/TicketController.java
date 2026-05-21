@@ -3,6 +3,7 @@ package com.example.ticketmanager.controller;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,10 +13,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.example.ticketmanager.domain.AppUser;
 import com.example.ticketmanager.domain.Ticket;
 import com.example.ticketmanager.repository.TicketRepository;
+import com.example.ticketmanager.repository.UserRepository;
 
 import jakarta.validation.Valid;
 
@@ -24,9 +28,11 @@ import jakarta.validation.Valid;
 public class TicketController {
 
 	private final TicketRepository ticketRepository;
+	private final UserRepository userRepository;
 
-	public TicketController(TicketRepository ticketRepository) {
+	public TicketController(TicketRepository ticketRepository, UserRepository userRepository) {
 		this.ticketRepository = ticketRepository;
+		this.userRepository = userRepository;
 	}
 
 	@GetMapping
@@ -71,7 +77,7 @@ public class TicketController {
 	}
 
 	private Ticket toTicket(TicketRequest request) {
-		return new Ticket(request.title(), request.repository(), request.link(), request.status());
+		return new Ticket(request.title(), request.repository(), request.link(), request.status(), assignee(request));
 	}
 
 	private void apply(Ticket ticket, TicketRequest request) {
@@ -79,5 +85,11 @@ public class TicketController {
 		ticket.setRepository(request.repository());
 		ticket.setLink(request.link());
 		ticket.setStatus(request.status());
+		ticket.setAssignee(assignee(request));
+	}
+
+	private AppUser assignee(TicketRequest request) {
+		return userRepository.findByUsername(request.assigneeUsername())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown assignee"));
 	}
 }

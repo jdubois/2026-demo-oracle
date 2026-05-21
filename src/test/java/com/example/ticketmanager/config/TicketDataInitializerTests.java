@@ -10,6 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.example.ticketmanager.TestcontainersConfiguration;
 import com.example.ticketmanager.repository.TicketRepository;
+import com.example.ticketmanager.repository.UserRepository;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
@@ -17,20 +18,26 @@ import com.example.ticketmanager.repository.TicketRepository;
 class TicketDataInitializerTests {
 
 	private final TicketRepository ticketRepository;
+	private final UserRepository userRepository;
 
 	@Autowired
-	TicketDataInitializerTests(TicketRepository ticketRepository) {
+	TicketDataInitializerTests(TicketRepository ticketRepository, UserRepository userRepository) {
 		this.ticketRepository = ticketRepository;
+		this.userRepository = userRepository;
 	}
 
 	@Test
 	void shouldSeedTicketsFromPreviousGithubSearch() {
 		assertThat(ticketRepository.count()).isEqualTo(10);
+		assertThat(userRepository.findAll())
+				.extracting("username")
+				.containsExactlyInAnyOrder("julien", "alice", "bob");
 		assertThat(ticketRepository.findAll())
 				.anySatisfy(ticket -> {
 					assertThat(ticket.getTitle()).isEqualTo("Add search in playlists");
 					assertThat(ticket.getRepository()).isEqualTo("TeamNewPipe/NewPipe");
 					assertThat(ticket.getLink()).isEqualTo("https://github.com/TeamNewPipe/NewPipe/issues/3037");
+					assertThat(ticket.getAssignee().getUsername()).isEqualTo("julien");
 				});
 	}
 }

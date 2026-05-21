@@ -206,7 +206,8 @@ body {
 }
 
 .repo-pill,
-.status-pill {
+.status-pill,
+.assignee-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -219,6 +220,11 @@ body {
 .repo-pill {
   color: #334155;
   background: #eef2ff;
+}
+
+.assignee-pill {
+  color: #6d28d9;
+  background: #f3e8ff;
 }
 
 .status-pill {

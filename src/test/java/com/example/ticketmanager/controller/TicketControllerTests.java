@@ -38,7 +38,8 @@ class TicketControllerTests {
 				  "title": "Add a beginner-friendly Java issue",
 				  "repository": "example/project",
 				  "link": "https://github.com/example/project/issues/1",
-				  "status": "OPEN"
+				  "status": "OPEN",
+				  "assigneeUsername": "julien"
 				}
 				""";
 
@@ -50,6 +51,7 @@ class TicketControllerTests {
 				.andExpect(jsonPath("$.title").value("Add a beginner-friendly Java issue"))
 				.andExpect(jsonPath("$.repository").value("example/project"))
 				.andExpect(jsonPath("$.status").value("OPEN"))
+				.andExpect(jsonPath("$.assignee.username").value("julien"))
 				.andReturn()
 				.getResponse()
 				.getHeader("Location");
@@ -63,7 +65,8 @@ class TicketControllerTests {
 				  "title": "Implement a beginner-friendly Java fix",
 				  "repository": "example/project",
 				  "link": "https://github.com/example/project/issues/1",
-				  "status": "IN_PROGRESS"
+				  "status": "IN_PROGRESS",
+				  "assigneeUsername": "bob"
 				}
 				""";
 
@@ -72,7 +75,8 @@ class TicketControllerTests {
 						.content(updatePayload))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.title").value("Implement a beginner-friendly Java fix"))
-				.andExpect(jsonPath("$.status").value("IN_PROGRESS"));
+				.andExpect(jsonPath("$.status").value("IN_PROGRESS"))
+				.andExpect(jsonPath("$.assignee.username").value("bob"));
 
 		mockMvc.perform(delete(location))
 				.andExpect(status().isNoContent());
@@ -88,7 +92,26 @@ class TicketControllerTests {
 				  "title": "",
 				  "repository": "not-a-repository",
 				  "link": "not-a-url",
-				  "status": "OPEN"
+				  "status": "OPEN",
+				  "assigneeUsername": "julien"
+				}
+				""";
+
+		mockMvc.perform(post("/api/tickets")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(payload))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void shouldRejectUnknownAssignee() throws Exception {
+		String payload = """
+				{
+				  "title": "Add a beginner-friendly Java issue",
+				  "repository": "example/project",
+				  "link": "https://github.com/example/project/issues/1",
+				  "status": "OPEN",
+				  "assigneeUsername": "unknown"
 				}
 				""";
 
