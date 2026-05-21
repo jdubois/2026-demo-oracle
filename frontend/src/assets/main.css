@@ -1,0 +1,272 @@
+:root {
+  color: #172033;
+  background: #eef3ff;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.26), transparent 28rem),
+    linear-gradient(180deg, #f7f9ff 0%, #eef3ff 45%, #ffffff 100%);
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.hero {
+  color: white;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(125, 211, 252, 0.45), transparent 24rem),
+    radial-gradient(circle at 90% 0%, rgba(244, 114, 182, 0.34), transparent 20rem),
+    linear-gradient(135deg, #111827 0%, #3730a3 55%, #0f766e 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -10% -35% -10%;
+  height: 13rem;
+  background: #f7f9ff;
+  border-radius: 50% 50% 0 0;
+}
+
+.hero .container {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow,
+.section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #7c3aed;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero .eyebrow {
+  color: #bfdbfe;
+}
+
+.hero h1 {
+  max-width: 720px;
+  margin: 0.75rem 0 1rem;
+  font-size: clamp(3rem, 8vw, 5.8rem);
+  font-weight: 900;
+  letter-spacing: -0.07em;
+  line-height: 0.9;
+}
+
+.hero .lead {
+  max-width: 720px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 1.25rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.glass-card {
+  min-height: 280px;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 2rem;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(22px);
+}
+
+.content-area {
+  position: relative;
+  z-index: 2;
+  margin-top: -1.5rem;
+  padding-bottom: 4rem;
+}
+
+.stat-card,
+.editor-card,
+.toolbar-card,
+.ticket-card,
+.empty-card,
+.loading-card {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.stat-card {
+  display: grid;
+  width: 100%;
+  min-height: 132px;
+  padding: 1.25rem;
+  color: #334155;
+  text-align: left;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.stat-card:hover,
+.stat-card.active {
+  transform: translateY(-4px);
+  border-color: rgba(79, 70, 229, 0.5);
+  box-shadow: 0 24px 70px rgba(79, 70, 229, 0.18);
+}
+
+.stat-card i {
+  color: #4f46e5;
+  font-size: 1.5rem;
+}
+
+.stat-card span {
+  font-weight: 700;
+}
+
+.stat-card strong {
+  font-size: 2rem;
+}
+
+.editor-card,
+.toolbar-card,
+.empty-card,
+.loading-card {
+  padding: 1.5rem;
+}
+
+.editor-card {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.toolbar-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.toolbar-controls {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) 12rem;
+  gap: 0.75rem;
+  width: min(100%, 32rem);
+}
+
+.ticket-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.ticket-card {
+  padding: 1.35rem;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.ticket-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.13);
+}
+
+.ticket-header,
+.ticket-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ticket-header {
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+
+.ticket-card h3 {
+  margin-bottom: 1.25rem;
+  color: #111827;
+  font-weight: 800;
+}
+
+.repo-pill,
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.repo-pill {
+  color: #334155;
+  background: #eef2ff;
+}
+
+.status-pill {
+  color: #1e3a8a;
+  background: #dbeafe;
+}
+
+.status-pill.in-progress {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.status-pill.done {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.status-pill.archived {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+.empty-card,
+.loading-card {
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  color: #64748b;
+  text-align: center;
+}
+
+.empty-card i {
+  color: #4f46e5;
+  font-size: 3rem;
+}
+
+@media (max-width: 992px) {
+  .editor-card {
+    position: static;
+  }
+
+  .toolbar-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .toolbar-controls {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+}
