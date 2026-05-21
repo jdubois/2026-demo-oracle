@@ -21,8 +21,9 @@ npm run dev
 
 ## Features
 
-- Add, edit, remove, search, and filter GitHub tickets.
+- Add, edit, remove, search, filter, and assign GitHub tickets.
 - Store tickets in PostgreSQL with Spring Data JPA.
+- Seed the database with the assignable users `julien`, `alice`, and `bob`.
 - Seed the database with 10 Java OSS good-first-issue tickets discovered through GitHub MCP.
 - Fancy Vue.js 3 UI powered by Vite, Bootstrap, and Bootstrap Icons.
 

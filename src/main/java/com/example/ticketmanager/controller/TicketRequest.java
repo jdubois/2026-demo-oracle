@@ -12,5 +12,6 @@ public record TicketRequest(
 		@NotBlank String title,
 		@NotBlank @Pattern(regexp = "^[\\w.-]+/[\\w.-]+$") String repository,
 		@NotBlank @URL String link,
-		@NotNull TicketStatus status) {
+		@NotNull TicketStatus status,
+		@NotBlank String assigneeUsername) {
 }
