@@ -10,10 +10,10 @@ const emptyForm = {
 }
 
 const statuses = [
-  { value: 'OPEN', label: 'Open', icon: 'bi-stars' },
-  { value: 'IN_PROGRESS', label: 'In progress', icon: 'bi-lightning-charge-fill' },
-  { value: 'DONE', label: 'Done', icon: 'bi-check2-circle' },
-  { value: 'ARCHIVED', label: 'Archived', icon: 'bi-archive' }
+  { value: 'OPEN', label: 'Ouvert', icon: 'bi-stars' },
+  { value: 'IN_PROGRESS', label: 'En cours', icon: 'bi-lightning-charge-fill' },
+  { value: 'DONE', label: 'Terminé', icon: 'bi-check2-circle' },
+  { value: 'ARCHIVED', label: 'Archivé', icon: 'bi-archive' }
 ]
 
 const tickets = ref([])
@@ -53,7 +53,7 @@ async function loadTickets() {
   try {
     const response = await fetch('/api/tickets')
     if (!response.ok) {
-      throw new Error('Could not load tickets')
+      throw new Error('Impossible de charger les tickets')
     }
     tickets.value = await response.json()
   } catch (err) {
@@ -82,7 +82,7 @@ async function saveTicket() {
       body: JSON.stringify(payload)
     })
     if (!response.ok) {
-      throw new Error('Ticket could not be saved. Check the repository and link format.')
+      throw new Error("Impossible d'enregistrer le ticket. Vérifiez le format du dépôt et du lien.")
     }
     resetForm()
     await loadTickets()
@@ -94,14 +94,14 @@ async function saveTicket() {
 }
 
 async function removeTicket(ticket) {
-  if (!confirm(`Remove "${ticket.title}"?`)) {
+  if (!confirm(`Supprimer "${ticket.title}" ?`)) {
     return
   }
   error.value = ''
   try {
     const response = await fetch(`/api/tickets/${ticket.id}`, { method: 'DELETE' })
     if (!response.ok) {
-      throw new Error('Ticket could not be removed')
+      throw new Error('Impossible de supprimer le ticket')
     }
     await loadTickets()
   } catch (err) {
@@ -129,29 +129,29 @@ function statusMeta(statusValue) {
       <div class="container py-5">
         <div class="row align-items-center g-4">
           <div class="col-lg-7">
-            <span class="eyebrow"><i class="bi bi-github"></i> Java open source helper</span>
-            <h1>OSS Ticket Radar</h1>
+            <span class="eyebrow"><i class="bi bi-github"></i> Assistant open source Java</span>
+            <h1>Radar de tickets OSS</h1>
             <p class="lead">
-              Track good first issues from Java repositories, curate the best opportunities, and
-              move each ticket from discovery to contribution.
+              Suivez les issues accessibles des dépôts Java, sélectionnez les meilleures
+              opportunités et accompagnez chaque ticket de la découverte à la contribution.
             </p>
             <div class="hero-actions">
               <a class="btn btn-light btn-lg shadow-sm" href="#ticket-form">
-                <i class="bi bi-plus-circle"></i> Add ticket
+                <i class="bi bi-plus-circle"></i> Ajouter un ticket
               </a>
               <button class="btn btn-outline-light btn-lg" type="button" @click="loadTickets">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
+                <i class="bi bi-arrow-clockwise"></i> Actualiser
               </button>
             </div>
           </div>
           <div class="col-lg-5">
             <div class="glass-card">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-white-50">Curated tickets</span>
+                <span class="text-white-50">Tickets sélectionnés</span>
                 <i class="bi bi-stars fs-3"></i>
               </div>
               <div class="display-3 fw-bold">{{ tickets.length }}</div>
-              <p class="mb-0 text-white-50">Seeded from the GitHub MCP search for Java projects.</p>
+              <p class="mb-0 text-white-50">Initialisés depuis la recherche GitHub MCP pour les projets Java.</p>
             </div>
           </div>
         </div>
@@ -183,31 +183,31 @@ function statusMeta(statusValue) {
           <form id="ticket-form" class="editor-card" @submit.prevent="saveTicket">
             <div class="d-flex justify-content-between align-items-start mb-3">
               <div>
-                <span class="section-kicker">Ticket editor</span>
-                <h2>{{ isEditing ? 'Edit ticket' : 'Add a ticket' }}</h2>
+                <span class="section-kicker">Éditeur de ticket</span>
+                <h2>{{ isEditing ? 'Modifier le ticket' : 'Ajouter un ticket' }}</h2>
               </div>
               <button v-if="isEditing" class="btn btn-sm btn-outline-secondary" type="button" @click="resetForm">
-                Cancel
+                Annuler
               </button>
             </div>
 
-            <label class="form-label" for="title">Title</label>
+            <label class="form-label" for="title">Titre</label>
             <input id="title" v-model="form.title" class="form-control form-control-lg" required />
 
-            <label class="form-label mt-3" for="repository">GitHub repository</label>
+            <label class="form-label mt-3" for="repository">Dépôt GitHub</label>
             <input
               id="repository"
               v-model="form.repository"
               class="form-control form-control-lg"
-              placeholder="owner/repository"
+              placeholder="proprietaire/depot"
               pattern="^[\w.-]+/[\w.-]+$"
               required
             />
 
-            <label class="form-label mt-3" for="link">Issue link</label>
+            <label class="form-label mt-3" for="link">Lien de l'issue</label>
             <input id="link" v-model="form.link" class="form-control form-control-lg" type="url" required />
 
-            <label class="form-label mt-3" for="status">Status</label>
+            <label class="form-label mt-3" for="status">Statut</label>
             <select id="status" v-model="form.status" class="form-select form-select-lg">
               <option v-for="status in statuses" :key="status.value" :value="status.value">
                 {{ status.label }}
@@ -216,7 +216,7 @@ function statusMeta(statusValue) {
 
             <button class="btn btn-primary btn-lg w-100 mt-4" type="submit" :disabled="saving">
               <span v-if="saving" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-              {{ isEditing ? 'Save changes' : 'Add ticket' }}
+              {{ isEditing ? 'Enregistrer les modifications' : 'Ajouter le ticket' }}
             </button>
           </form>
         </aside>
@@ -224,18 +224,18 @@ function statusMeta(statusValue) {
         <section class="col-lg-8">
           <div class="toolbar-card">
             <div>
-              <span class="section-kicker">Radar board</span>
-              <h2>Good tickets for Java OSS projects</h2>
+              <span class="section-kicker">Tableau radar</span>
+              <h2>Bons tickets pour les projets Java OSS</h2>
             </div>
             <div class="toolbar-controls">
               <input
                 v-model="search"
                 class="form-control"
-                placeholder="Search title or repository"
+                placeholder="Rechercher un titre ou un dépôt"
                 type="search"
               />
               <select v-model="selectedStatus" class="form-select">
-                <option value="ALL">All statuses</option>
+                <option value="ALL">Tous les statuts</option>
                 <option v-for="status in statuses" :key="status.value" :value="status.value">
                   {{ status.label }}
                 </option>
@@ -245,13 +245,13 @@ function statusMeta(statusValue) {
 
           <div v-if="loading" class="loading-card">
             <div class="spinner-border text-primary" role="status"></div>
-            <span>Loading tickets...</span>
+            <span>Chargement des tickets...</span>
           </div>
 
           <div v-else-if="filteredTickets.length === 0" class="empty-card">
             <i class="bi bi-search"></i>
-            <h3>No tickets found</h3>
-            <p>Adjust the filters or add a new GitHub issue to the board.</p>
+            <h3>Aucun ticket trouvé</h3>
+            <p>Ajustez les filtres ou ajoutez une nouvelle issue GitHub au tableau.</p>
           </div>
 
           <div v-else class="ticket-grid">
@@ -266,13 +266,13 @@ function statusMeta(statusValue) {
               <h3>{{ ticket.title }}</h3>
               <div class="ticket-actions">
                 <a class="btn btn-sm btn-dark" :href="ticket.link" target="_blank" rel="noreferrer">
-                  Open on GitHub <i class="bi bi-box-arrow-up-right"></i>
+                  Ouvrir sur GitHub <i class="bi bi-box-arrow-up-right"></i>
                 </a>
                 <button class="btn btn-sm btn-outline-primary" type="button" @click="editTicket(ticket)">
-                  Edit
+                  Modifier
                 </button>
                 <button class="btn btn-sm btn-outline-danger" type="button" @click="removeTicket(ticket)">
-                  Remove
+                  Supprimer
                 </button>
               </div>
             </article>
