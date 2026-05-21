@@ -11,10 +11,10 @@ const emptyForm = {
 }
 
 const statuses = [
-  { value: 'OPEN', label: 'Open', icon: 'bi-stars' },
-  { value: 'IN_PROGRESS', label: 'In progress', icon: 'bi-lightning-charge-fill' },
-  { value: 'DONE', label: 'Done', icon: 'bi-check2-circle' },
-  { value: 'ARCHIVED', label: 'Archived', icon: 'bi-archive' }
+  { value: 'OPEN', label: 'Ouvert', icon: 'bi-stars' },
+  { value: 'IN_PROGRESS', label: 'En cours', icon: 'bi-lightning-charge-fill' },
+  { value: 'DONE', label: 'Terminé', icon: 'bi-check2-circle' },
+  { value: 'ARCHIVED', label: 'Archivé', icon: 'bi-archive' }
 ]
 
 const tickets = ref([])
@@ -75,7 +75,7 @@ async function loadInitialData() {
 async function loadUsers() {
   const response = await fetch('/api/users')
   if (!response.ok) {
-    throw new Error('Could not load users')
+    throw new Error('Impossible de charger les utilisateurs')
   }
   users.value = await response.json()
 }
@@ -85,7 +85,7 @@ async function loadTickets() {
   try {
     const response = await fetch('/api/tickets')
     if (!response.ok) {
-      throw new Error('Could not load tickets')
+      throw new Error('Impossible de charger les tickets')
     }
     tickets.value = await response.json()
   } catch (err) {
@@ -113,7 +113,7 @@ async function saveTicket() {
       body: JSON.stringify(payload)
     })
     if (!response.ok) {
-      throw new Error('Ticket could not be saved. Check the repository, link, and assignee.')
+      throw new Error("Le ticket n'a pas pu être enregistré. Vérifiez le dépôt, le lien et l'assignation.")
     }
     resetForm()
     await loadTickets()
@@ -125,14 +125,14 @@ async function saveTicket() {
 }
 
 async function removeTicket(ticket) {
-  if (!confirm(`Remove "${ticket.title}"?`)) {
+  if (!confirm(`Supprimer « ${ticket.title} » ?`)) {
     return
   }
   error.value = ''
   try {
     const response = await fetch(`/api/tickets/${ticket.id}`, { method: 'DELETE' })
     if (!response.ok) {
-      throw new Error('Ticket could not be removed')
+      throw new Error("Le ticket n'a pas pu être supprimé")
     }
     await loadTickets()
   } catch (err) {
@@ -172,20 +172,20 @@ function setDefaultAssignee() {
   <main class="app-shell">
     <div class="enterprise-shell">
       <nav class="topbar">
-        <a class="brand-mark" href="#" aria-label="OSS Ticket Radar home">
+        <a class="brand-mark" href="#" aria-label="Accueil d'OSS Ticket Radar">
           <span class="brand-icon"><i class="bi bi-grid-1x2-fill"></i></span>
           <span>
             <strong>OSS Ticket Radar</strong>
-            <small>Contribution portfolio</small>
+            <small>Portefeuille de contributions</small>
           </span>
         </a>
         <div class="topbar-actions">
-          <span class="environment-pill"><i class="bi bi-shield-check"></i> Enterprise workspace</span>
+          <span class="environment-pill"><i class="bi bi-shield-check"></i> Espace de travail entreprise</span>
           <button class="btn btn-outline-secondary" type="button" @click="loadTickets">
-            <i class="bi bi-arrow-clockwise"></i> Sync
+            <i class="bi bi-arrow-clockwise"></i> Synchroniser
           </button>
           <a class="btn btn-primary" href="#ticket-form">
-            <i class="bi bi-plus-lg"></i> New ticket
+            <i class="bi bi-plus-lg"></i> Nouveau ticket
           </a>
         </div>
       </nav>
@@ -193,16 +193,16 @@ function setDefaultAssignee() {
       <section class="container-fluid dashboard-layout">
         <aside class="sidebar-panel">
           <div class="sidebar-section">
-            <span class="sidebar-label">Workspace</span>
-            <a class="sidebar-link active" href="#"><i class="bi bi-kanban"></i> Radar board</a>
-            <a class="sidebar-link" href="#ticket-form"><i class="bi bi-pencil-square"></i> Ticket editor</a>
+            <span class="sidebar-label">Espace de travail</span>
+            <a class="sidebar-link active" href="#"><i class="bi bi-kanban"></i> Tableau radar</a>
+            <a class="sidebar-link" href="#ticket-form"><i class="bi bi-pencil-square"></i> Éditeur de ticket</a>
           </div>
           <div class="sidebar-section">
-            <span class="sidebar-label">Governance</span>
+            <span class="sidebar-label">Gouvernance</span>
             <div class="compliance-card">
               <i class="bi bi-patch-check-fill"></i>
-              <strong>Curated sources</strong>
-              <span>Repository, issue URLs, and assignee ownership are validated before publishing.</span>
+              <strong>Sources sélectionnées</strong>
+              <span>Le dépôt, les URL d'issues et les responsables sont validés avant publication.</span>
             </div>
           </div>
         </aside>
@@ -210,17 +210,17 @@ function setDefaultAssignee() {
         <div class="workspace-panel">
           <header class="dashboard-header">
             <div>
-              <span class="eyebrow"><i class="bi bi-github"></i> Java open source operations</span>
-              <h1>Manage contribution-ready tickets with portfolio-grade clarity.</h1>
+              <span class="eyebrow"><i class="bi bi-github"></i> Opérations open source Java</span>
+              <h1>Gérez les tickets prêts à contribuer avec une vision claire.</h1>
               <p class="lead">
-                Track promising Java OSS issues, keep repository and owner context visible, and move
-                work through a controlled discovery-to-delivery workflow.
+                Suivez les issues Java open source prometteuses, gardez le contexte des dépôts et
+                des responsables visible, et faites avancer le travail jusqu'à la livraison.
               </p>
             </div>
             <div class="executive-card">
-              <span class="section-kicker">Portfolio health</span>
+              <span class="section-kicker">Santé du portefeuille</span>
               <strong>{{ completionRate }}%</strong>
-              <span>completion rate across {{ users.length }} contributors</span>
+              <span>taux de réalisation pour {{ users.length }} contributeurs</span>
               <div class="progress" role="progressbar" :aria-valuenow="completionRate" aria-valuemin="0" aria-valuemax="100">
                 <div class="progress-bar" :style="{ width: `${completionRate}%` }"></div>
               </div>
@@ -231,7 +231,7 @@ function setDefaultAssignee() {
             <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
           </div>
 
-          <section class="metric-grid" aria-label="Ticket status metrics">
+          <section class="metric-grid" aria-label="Indicateurs de statut des tickets">
             <button
               v-for="stat in stats"
               :key="stat.value"
@@ -251,18 +251,18 @@ function setDefaultAssignee() {
               <form id="ticket-form" class="editor-card" @submit.prevent="saveTicket">
                 <div class="panel-heading">
                   <div>
-                    <span class="section-kicker">Ticket intake</span>
-                    <h2>{{ isEditing ? 'Edit ticket' : 'Add a ticket' }}</h2>
+                    <span class="section-kicker">Saisie des tickets</span>
+                    <h2>{{ isEditing ? 'Modifier le ticket' : 'Ajouter un ticket' }}</h2>
                   </div>
                   <button v-if="isEditing" class="btn btn-sm btn-outline-secondary" type="button" @click="resetForm">
-                    Cancel
+                    Annuler
                   </button>
                 </div>
 
-                <label class="form-label" for="title">Title</label>
+                <label class="form-label" for="title">Titre</label>
                 <input id="title" v-model="form.title" class="form-control form-control-lg" required />
 
-                <label class="form-label mt-3" for="repository">GitHub repository</label>
+                <label class="form-label mt-3" for="repository">Dépôt GitHub</label>
                 <input
                   id="repository"
                   v-model="form.repository"
@@ -272,19 +272,19 @@ function setDefaultAssignee() {
                   required
                 />
 
-                <label class="form-label mt-3" for="link">Issue link</label>
+                <label class="form-label mt-3" for="link">Lien de l'issue</label>
                 <input id="link" v-model="form.link" class="form-control form-control-lg" type="url" required />
 
-                <label class="form-label mt-3" for="status">Status</label>
+                <label class="form-label mt-3" for="status">Statut</label>
                 <select id="status" v-model="form.status" class="form-select form-select-lg">
                   <option v-for="status in statuses" :key="status.value" :value="status.value">
                     {{ status.label }}
                   </option>
                 </select>
 
-                <label class="form-label mt-3" for="assignee">Assignee</label>
+                <label class="form-label mt-3" for="assignee">Responsable</label>
                 <select id="assignee" v-model="form.assigneeUsername" class="form-select form-select-lg" required>
-                  <option disabled value="">Select a user</option>
+                  <option disabled value="">Sélectionner un utilisateur</option>
                   <option v-for="user in users" :key="user.id" :value="user.username">
                     {{ user.username }}
                   </option>
@@ -292,7 +292,7 @@ function setDefaultAssignee() {
 
                 <button class="btn btn-primary btn-lg w-100 mt-4" type="submit" :disabled="saving">
                   <span v-if="saving" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-                  {{ isEditing ? 'Save changes' : 'Add ticket' }}
+                  {{ isEditing ? 'Enregistrer les modifications' : 'Ajouter le ticket' }}
                 </button>
               </form>
             </aside>
@@ -300,19 +300,19 @@ function setDefaultAssignee() {
             <section class="col-xl-8">
               <div class="toolbar-card">
                 <div>
-                  <span class="section-kicker">Radar board</span>
-                  <h2>Good tickets for Java OSS projects</h2>
-                  <p>{{ visibleCount }} of {{ tickets.length }} tickets shown</p>
+                  <span class="section-kicker">Tableau radar</span>
+                  <h2>Bons tickets pour les projets Java open source</h2>
+                  <p>{{ visibleCount }} sur {{ tickets.length }} tickets affichés</p>
                 </div>
                 <div class="toolbar-controls">
                   <input
                     v-model="search"
                     class="form-control"
-                    placeholder="Search title, repository, or assignee"
+                    placeholder="Rechercher par titre, dépôt ou responsable"
                     type="search"
                   />
                   <select v-model="selectedStatus" class="form-select">
-                    <option value="ALL">All statuses</option>
+                    <option value="ALL">Tous les statuts</option>
                     <option v-for="status in statuses" :key="status.value" :value="status.value">
                       {{ status.label }}
                     </option>
@@ -322,13 +322,13 @@ function setDefaultAssignee() {
 
               <div v-if="loading" class="loading-card">
                 <div class="spinner-border text-primary" role="status"></div>
-                <span>Loading tickets...</span>
+                <span>Chargement des tickets...</span>
               </div>
 
               <div v-else-if="filteredTickets.length === 0" class="empty-card">
                 <i class="bi bi-search"></i>
-                <h3>No tickets found</h3>
-                <p>Adjust the filters or add a new GitHub issue to the board.</p>
+                <h3>Aucun ticket trouvé</h3>
+                <p>Ajustez les filtres ou ajoutez une nouvelle issue GitHub au tableau.</p>
               </div>
 
               <div v-else class="ticket-grid">
@@ -340,19 +340,19 @@ function setDefaultAssignee() {
                       {{ statusMeta(ticket.status).label }}
                     </span>
                     <span class="assignee-pill">
-                      <i class="bi bi-person-check"></i> {{ ticket.assignee?.username ?? 'Unassigned' }}
+                      <i class="bi bi-person-check"></i> {{ ticket.assignee?.username ?? 'Non assigné' }}
                     </span>
                   </div>
                   <h3>{{ ticket.title }}</h3>
                   <div class="ticket-actions">
                     <a class="btn btn-sm btn-dark" :href="ticket.link" target="_blank" rel="noreferrer">
-                      Open on GitHub <i class="bi bi-box-arrow-up-right"></i>
+                      Ouvrir sur GitHub <i class="bi bi-box-arrow-up-right"></i>
                     </a>
                     <button class="btn btn-sm btn-outline-primary" type="button" @click="editTicket(ticket)">
-                      Edit
+                      Modifier
                     </button>
                     <button class="btn btn-sm btn-outline-danger" type="button" @click="removeTicket(ticket)">
-                      Remove
+                      Supprimer
                     </button>
                   </div>
                 </article>
