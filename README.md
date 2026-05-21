@@ -8,8 +8,8 @@ Ticket management application for finding good GitHub issues to help Java open s
 ./mvnw spring-boot:run
 ```
 
-Spring Boot starts PostgreSQL automatically through Docker Compose. The Vue UI is available at
-<http://localhost:8080/> after the Maven frontend build runs.
+Spring Boot starts PostgreSQL automatically through Docker Compose. Maven builds the Vue UI
+automatically before the app starts, then serves it at <http://localhost:8080/>.
 
 For hot reload:
 

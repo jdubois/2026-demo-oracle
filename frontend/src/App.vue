@@ -46,6 +46,15 @@ const stats = computed(() =>
   }))
 )
 
+const visibleCount = computed(() => filteredTickets.value.length)
+const completionRate = computed(() => {
+  if (tickets.value.length === 0) {
+    return 0
+  }
+  const completedTickets = tickets.value.filter((ticket) => ticket.status === 'DONE').length
+  return Math.round((completedTickets / tickets.value.length) * 100)
+})
+
 const isEditing = computed(() => form.id !== null)
 
 onMounted(loadInitialData)
@@ -161,173 +170,197 @@ function setDefaultAssignee() {
 
 <template>
   <main class="app-shell">
-    <section class="hero">
-      <div class="container py-5">
-        <div class="row align-items-center g-4">
-          <div class="col-lg-7">
-            <span class="eyebrow"><i class="bi bi-github"></i> Java open source helper</span>
-            <h1>OSS Ticket Radar</h1>
-            <p class="lead">
-              Track good first issues from Java repositories, curate the best opportunities, and
-              move each ticket from discovery to contribution.
-            </p>
-            <div class="hero-actions">
-              <a class="btn btn-light btn-lg shadow-sm" href="#ticket-form">
-                <i class="bi bi-plus-circle"></i> Add ticket
-              </a>
-              <button class="btn btn-outline-light btn-lg" type="button" @click="loadTickets">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
-              </button>
-            </div>
-          </div>
-          <div class="col-lg-5">
-            <div class="glass-card">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-white-50">Curated tickets</span>
-                <i class="bi bi-stars fs-3"></i>
-              </div>
-              <div class="display-3 fw-bold">{{ tickets.length }}</div>
-              <p class="mb-0 text-white-50">
-                Assigned across {{ users.length }} contributors from the user table.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="container content-area">
-      <div v-if="error" class="alert alert-danger shadow-sm" role="alert">
-        <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
-      </div>
-
-      <div class="row g-4 mb-4">
-        <div v-for="stat in stats" :key="stat.value" class="col-6 col-lg-3">
-          <button
-            type="button"
-            class="stat-card"
-            :class="{ active: selectedStatus === stat.value }"
-            @click="selectedStatus = selectedStatus === stat.value ? 'ALL' : stat.value"
-          >
-            <i :class="['bi', stat.icon]"></i>
-            <span>{{ stat.label }}</span>
-            <strong>{{ stat.count }}</strong>
+    <div class="enterprise-shell">
+      <nav class="topbar">
+        <a class="brand-mark" href="#" aria-label="OSS Ticket Radar home">
+          <span class="brand-icon"><i class="bi bi-grid-1x2-fill"></i></span>
+          <span>
+            <strong>OSS Ticket Radar</strong>
+            <small>Contribution portfolio</small>
+          </span>
+        </a>
+        <div class="topbar-actions">
+          <span class="environment-pill"><i class="bi bi-shield-check"></i> Enterprise workspace</span>
+          <button class="btn btn-outline-secondary" type="button" @click="loadTickets">
+            <i class="bi bi-arrow-clockwise"></i> Sync
           </button>
+          <a class="btn btn-primary" href="#ticket-form">
+            <i class="bi bi-plus-lg"></i> New ticket
+          </a>
         </div>
-      </div>
+      </nav>
 
-      <div class="row g-4">
-        <aside class="col-lg-4">
-          <form id="ticket-form" class="editor-card" @submit.prevent="saveTicket">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <span class="section-kicker">Ticket editor</span>
-                <h2>{{ isEditing ? 'Edit ticket' : 'Add a ticket' }}</h2>
-              </div>
-              <button v-if="isEditing" class="btn btn-sm btn-outline-secondary" type="button" @click="resetForm">
-                Cancel
-              </button>
+      <section class="container-fluid dashboard-layout">
+        <aside class="sidebar-panel">
+          <div class="sidebar-section">
+            <span class="sidebar-label">Workspace</span>
+            <a class="sidebar-link active" href="#"><i class="bi bi-kanban"></i> Radar board</a>
+            <a class="sidebar-link" href="#ticket-form"><i class="bi bi-pencil-square"></i> Ticket editor</a>
+          </div>
+          <div class="sidebar-section">
+            <span class="sidebar-label">Governance</span>
+            <div class="compliance-card">
+              <i class="bi bi-patch-check-fill"></i>
+              <strong>Curated sources</strong>
+              <span>Repository, issue URLs, and assignee ownership are validated before publishing.</span>
             </div>
-
-            <label class="form-label" for="title">Title</label>
-            <input id="title" v-model="form.title" class="form-control form-control-lg" required />
-
-            <label class="form-label mt-3" for="repository">GitHub repository</label>
-            <input
-              id="repository"
-              v-model="form.repository"
-              class="form-control form-control-lg"
-              placeholder="owner/repository"
-              pattern="^[\w.-]+/[\w.-]+$"
-              required
-            />
-
-            <label class="form-label mt-3" for="link">Issue link</label>
-            <input id="link" v-model="form.link" class="form-control form-control-lg" type="url" required />
-
-            <label class="form-label mt-3" for="status">Status</label>
-            <select id="status" v-model="form.status" class="form-select form-select-lg">
-              <option v-for="status in statuses" :key="status.value" :value="status.value">
-                {{ status.label }}
-              </option>
-            </select>
-
-            <label class="form-label mt-3" for="assignee">Assignee</label>
-            <select id="assignee" v-model="form.assigneeUsername" class="form-select form-select-lg" required>
-              <option disabled value="">Select a user</option>
-              <option v-for="user in users" :key="user.id" :value="user.username">
-                {{ user.username }}
-              </option>
-            </select>
-
-            <button class="btn btn-primary btn-lg w-100 mt-4" type="submit" :disabled="saving">
-              <span v-if="saving" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-              {{ isEditing ? 'Save changes' : 'Add ticket' }}
-            </button>
-          </form>
+          </div>
         </aside>
 
-        <section class="col-lg-8">
-          <div class="toolbar-card">
+        <div class="workspace-panel">
+          <header class="dashboard-header">
             <div>
-              <span class="section-kicker">Radar board</span>
-              <h2>Good tickets for Java OSS projects</h2>
+              <span class="eyebrow"><i class="bi bi-github"></i> Java open source operations</span>
+              <h1>Manage contribution-ready tickets with portfolio-grade clarity.</h1>
+              <p class="lead">
+                Track promising Java OSS issues, keep repository and owner context visible, and move
+                work through a controlled discovery-to-delivery workflow.
+              </p>
             </div>
-            <div class="toolbar-controls">
-              <input
-                v-model="search"
-                class="form-control"
-                placeholder="Search title, repository, or assignee"
-                type="search"
-              />
-              <select v-model="selectedStatus" class="form-select">
-                <option value="ALL">All statuses</option>
-                <option v-for="status in statuses" :key="status.value" :value="status.value">
-                  {{ status.label }}
-                </option>
-              </select>
+            <div class="executive-card">
+              <span class="section-kicker">Portfolio health</span>
+              <strong>{{ completionRate }}%</strong>
+              <span>completion rate across {{ users.length }} contributors</span>
+              <div class="progress" role="progressbar" :aria-valuenow="completionRate" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" :style="{ width: `${completionRate}%` }"></div>
+              </div>
             </div>
+          </header>
+
+          <div v-if="error" class="alert alert-danger shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
           </div>
 
-          <div v-if="loading" class="loading-card">
-            <div class="spinner-border text-primary" role="status"></div>
-            <span>Loading tickets...</span>
-          </div>
+          <section class="metric-grid" aria-label="Ticket status metrics">
+            <button
+              v-for="stat in stats"
+              :key="stat.value"
+              type="button"
+              class="stat-card"
+              :class="{ active: selectedStatus === stat.value }"
+              @click="selectedStatus = selectedStatus === stat.value ? 'ALL' : stat.value"
+            >
+              <span class="stat-icon"><i :class="['bi', stat.icon]"></i></span>
+              <span>{{ stat.label }}</span>
+              <strong>{{ stat.count }}</strong>
+            </button>
+          </section>
 
-          <div v-else-if="filteredTickets.length === 0" class="empty-card">
-            <i class="bi bi-search"></i>
-            <h3>No tickets found</h3>
-            <p>Adjust the filters or add a new GitHub issue to the board.</p>
-          </div>
+          <div class="row g-4">
+            <aside class="col-xl-4">
+              <form id="ticket-form" class="editor-card" @submit.prevent="saveTicket">
+                <div class="panel-heading">
+                  <div>
+                    <span class="section-kicker">Ticket intake</span>
+                    <h2>{{ isEditing ? 'Edit ticket' : 'Add a ticket' }}</h2>
+                  </div>
+                  <button v-if="isEditing" class="btn btn-sm btn-outline-secondary" type="button" @click="resetForm">
+                    Cancel
+                  </button>
+                </div>
 
-          <div v-else class="ticket-grid">
-            <article v-for="ticket in filteredTickets" :key="ticket.id" class="ticket-card">
-              <div class="ticket-header">
-                <span class="repo-pill"><i class="bi bi-box-seam"></i> {{ ticket.repository }}</span>
-                <span class="status-pill" :class="ticket.status.toLowerCase().replace('_', '-')">
-                  <i :class="['bi', statusMeta(ticket.status).icon]"></i>
-                  {{ statusMeta(ticket.status).label }}
-                </span>
-                <span class="assignee-pill">
-                  <i class="bi bi-person-check"></i> {{ ticket.assignee?.username ?? 'Unassigned' }}
-                </span>
-              </div>
-              <h3>{{ ticket.title }}</h3>
-              <div class="ticket-actions">
-                <a class="btn btn-sm btn-dark" :href="ticket.link" target="_blank" rel="noreferrer">
-                  Open on GitHub <i class="bi bi-box-arrow-up-right"></i>
-                </a>
-                <button class="btn btn-sm btn-outline-primary" type="button" @click="editTicket(ticket)">
-                  Edit
+                <label class="form-label" for="title">Title</label>
+                <input id="title" v-model="form.title" class="form-control form-control-lg" required />
+
+                <label class="form-label mt-3" for="repository">GitHub repository</label>
+                <input
+                  id="repository"
+                  v-model="form.repository"
+                  class="form-control form-control-lg"
+                  placeholder="owner/repository"
+                  pattern="^[\w.-]+/[\w.-]+$"
+                  required
+                />
+
+                <label class="form-label mt-3" for="link">Issue link</label>
+                <input id="link" v-model="form.link" class="form-control form-control-lg" type="url" required />
+
+                <label class="form-label mt-3" for="status">Status</label>
+                <select id="status" v-model="form.status" class="form-select form-select-lg">
+                  <option v-for="status in statuses" :key="status.value" :value="status.value">
+                    {{ status.label }}
+                  </option>
+                </select>
+
+                <label class="form-label mt-3" for="assignee">Assignee</label>
+                <select id="assignee" v-model="form.assigneeUsername" class="form-select form-select-lg" required>
+                  <option disabled value="">Select a user</option>
+                  <option v-for="user in users" :key="user.id" :value="user.username">
+                    {{ user.username }}
+                  </option>
+                </select>
+
+                <button class="btn btn-primary btn-lg w-100 mt-4" type="submit" :disabled="saving">
+                  <span v-if="saving" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                  {{ isEditing ? 'Save changes' : 'Add ticket' }}
                 </button>
-                <button class="btn btn-sm btn-outline-danger" type="button" @click="removeTicket(ticket)">
-                  Remove
-                </button>
+              </form>
+            </aside>
+
+            <section class="col-xl-8">
+              <div class="toolbar-card">
+                <div>
+                  <span class="section-kicker">Radar board</span>
+                  <h2>Good tickets for Java OSS projects</h2>
+                  <p>{{ visibleCount }} of {{ tickets.length }} tickets shown</p>
+                </div>
+                <div class="toolbar-controls">
+                  <input
+                    v-model="search"
+                    class="form-control"
+                    placeholder="Search title, repository, or assignee"
+                    type="search"
+                  />
+                  <select v-model="selectedStatus" class="form-select">
+                    <option value="ALL">All statuses</option>
+                    <option v-for="status in statuses" :key="status.value" :value="status.value">
+                      {{ status.label }}
+                    </option>
+                  </select>
+                </div>
               </div>
-            </article>
+
+              <div v-if="loading" class="loading-card">
+                <div class="spinner-border text-primary" role="status"></div>
+                <span>Loading tickets...</span>
+              </div>
+
+              <div v-else-if="filteredTickets.length === 0" class="empty-card">
+                <i class="bi bi-search"></i>
+                <h3>No tickets found</h3>
+                <p>Adjust the filters or add a new GitHub issue to the board.</p>
+              </div>
+
+              <div v-else class="ticket-grid">
+                <article v-for="ticket in filteredTickets" :key="ticket.id" class="ticket-card">
+                  <div class="ticket-header">
+                    <span class="repo-pill"><i class="bi bi-box-seam"></i> {{ ticket.repository }}</span>
+                    <span class="status-pill" :class="ticket.status.toLowerCase().replace('_', '-')">
+                      <i :class="['bi', statusMeta(ticket.status).icon]"></i>
+                      {{ statusMeta(ticket.status).label }}
+                    </span>
+                    <span class="assignee-pill">
+                      <i class="bi bi-person-check"></i> {{ ticket.assignee?.username ?? 'Unassigned' }}
+                    </span>
+                  </div>
+                  <h3>{{ ticket.title }}</h3>
+                  <div class="ticket-actions">
+                    <a class="btn btn-sm btn-dark" :href="ticket.link" target="_blank" rel="noreferrer">
+                      Open on GitHub <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <button class="btn btn-sm btn-outline-primary" type="button" @click="editTicket(ticket)">
+                      Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" type="button" @click="removeTicket(ticket)">
+                      Remove
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </section>
           </div>
-        </section>
-      </div>
-    </section>
+        </div>
+      </section>
+    </div>
   </main>
 </template>
