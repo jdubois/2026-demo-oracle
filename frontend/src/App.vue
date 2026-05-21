@@ -6,7 +6,8 @@ const emptyForm = {
   title: '',
   repository: '',
   link: '',
-  status: 'OPEN'
+  status: 'OPEN',
+  assigneeUsername: ''
 }
 
 const statuses = [
@@ -17,6 +18,7 @@ const statuses = [
 ]
 
 const tickets = ref([])
+const users = ref([])
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
@@ -31,7 +33,8 @@ const filteredTickets = computed(() => {
     const matchesQuery =
       !query ||
       ticket.title.toLowerCase().includes(query) ||
-      ticket.repository.toLowerCase().includes(query)
+      ticket.repository.toLowerCase().includes(query) ||
+      ticket.assignee?.username?.toLowerCase().includes(query)
     return matchesStatus && matchesQuery
   })
 })
@@ -45,10 +48,30 @@ const stats = computed(() =>
 
 const isEditing = computed(() => form.id !== null)
 
-onMounted(loadTickets)
+onMounted(loadInitialData)
+
+async function loadInitialData() {
+  loading.value = true
+  error.value = ''
+  try {
+    await Promise.all([loadUsers(), loadTickets()])
+    setDefaultAssignee()
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadUsers() {
+  const response = await fetch('/api/users')
+  if (!response.ok) {
+    throw new Error('Could not load users')
+  }
+  users.value = await response.json()
+}
 
 async function loadTickets() {
-  loading.value = true
   error.value = ''
   try {
     const response = await fetch('/api/tickets')
@@ -58,8 +81,6 @@ async function loadTickets() {
     tickets.value = await response.json()
   } catch (err) {
     error.value = err.message
-  } finally {
-    loading.value = false
   }
 }
 
@@ -70,7 +91,8 @@ async function saveTicket() {
     title: form.title.trim(),
     repository: form.repository.trim(),
     link: form.link.trim(),
-    status: form.status
+    status: form.status,
+    assigneeUsername: form.assigneeUsername
   }
   const url = isEditing.value ? `/api/tickets/${form.id}` : '/api/tickets'
   const method = isEditing.value ? 'PUT' : 'POST'
@@ -82,7 +104,7 @@ async function saveTicket() {
       body: JSON.stringify(payload)
     })
     if (!response.ok) {
-      throw new Error('Ticket could not be saved. Check the repository and link format.')
+      throw new Error('Ticket could not be saved. Check the repository, link, and assignee.')
     }
     resetForm()
     await loadTickets()
@@ -110,16 +132,30 @@ async function removeTicket(ticket) {
 }
 
 function editTicket(ticket) {
-  Object.assign(form, ticket)
+  Object.assign(form, {
+    id: ticket.id,
+    title: ticket.title,
+    repository: ticket.repository,
+    link: ticket.link,
+    status: ticket.status,
+    assigneeUsername: ticket.assignee?.username ?? ''
+  })
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function resetForm() {
   Object.assign(form, emptyForm)
+  setDefaultAssignee()
 }
 
 function statusMeta(statusValue) {
   return statuses.find((status) => status.value === statusValue) ?? statuses[0]
+}
+
+function setDefaultAssignee() {
+  if (!form.assigneeUsername && users.value.length > 0) {
+    form.assigneeUsername = users.value[0].username
+  }
 }
 </script>
 
@@ -151,7 +187,9 @@ function statusMeta(statusValue) {
                 <i class="bi bi-stars fs-3"></i>
               </div>
               <div class="display-3 fw-bold">{{ tickets.length }}</div>
-              <p class="mb-0 text-white-50">Seeded from the GitHub MCP search for Java projects.</p>
+              <p class="mb-0 text-white-50">
+                Assigned across {{ users.length }} contributors from the user table.
+              </p>
             </div>
           </div>
         </div>
@@ -214,6 +252,14 @@ function statusMeta(statusValue) {
               </option>
             </select>
 
+            <label class="form-label mt-3" for="assignee">Assignee</label>
+            <select id="assignee" v-model="form.assigneeUsername" class="form-select form-select-lg" required>
+              <option disabled value="">Select a user</option>
+              <option v-for="user in users" :key="user.id" :value="user.username">
+                {{ user.username }}
+              </option>
+            </select>
+
             <button class="btn btn-primary btn-lg w-100 mt-4" type="submit" :disabled="saving">
               <span v-if="saving" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
               {{ isEditing ? 'Save changes' : 'Add ticket' }}
@@ -231,7 +277,7 @@ function statusMeta(statusValue) {
               <input
                 v-model="search"
                 class="form-control"
-                placeholder="Search title or repository"
+                placeholder="Search title, repository, or assignee"
                 type="search"
               />
               <select v-model="selectedStatus" class="form-select">
@@ -261,6 +307,9 @@ function statusMeta(statusValue) {
                 <span class="status-pill" :class="ticket.status.toLowerCase().replace('_', '-')">
                   <i :class="['bi', statusMeta(ticket.status).icon]"></i>
                   {{ statusMeta(ticket.status).label }}
+                </span>
+                <span class="assignee-pill">
+                  <i class="bi bi-person-check"></i> {{ ticket.assignee?.username ?? 'Unassigned' }}
                 </span>
               </div>
               <h3>{{ ticket.title }}</h3>
